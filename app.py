@@ -111,7 +111,11 @@ def diabetes2():
     # new_data_dict = {'age':[arr[0]],'gender':[arr[1]],'polyuria':[arr[2]],'polydipsia':[arr[3]],'sudden_weight_loss':[arr[4]],'polyphagia':[arr[5]],'delayed_healing':[arr[6]],'obesity':[arr[7]]
     # }
 
-    filename = env.fullPath + '\\diabetes\\DT.sav'
+    if env.development == "local":
+        filePath = '\\diabetes\\DT.sav'
+    elif env.development == "doscom":
+        filePath = "/diabetes/DT.sav"
+    filename = env.fullPath +  filePath
     loaded_model = pickle.load(open(filename, 'rb'))
 
     features = pd.DataFrame(new_data_dict, index=[0])
