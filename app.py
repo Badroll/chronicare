@@ -1,9 +1,14 @@
 from flask import Flask, request, send_file, jsonify
 from flask_cors import CORS, cross_origin
-import tensorflow as tf
-from tensorflow.keras.models import load_model
+#import tensorflow as tf
+#from tensorflow.keras.models import load_model
 import pandas as pd
 import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
+import pickle
+
 import json
 
 import env
@@ -73,6 +78,60 @@ def diabetes():
         "CONFIDENT" : confident_p if finalPredict > 0.5 else confident_n,
         "CONFIDENT_POSITIVE" : confident_p,
         "CONFIDENT_NEGATIVE" : confident_n,
+    }
+
+    return composeReply("SUCCESS", "Prediksi", returnData)
+
+
+@app.route("/diabetes2", methods=['POST'])
+def diabetes2():
+    age = request.form.get("age")
+    gender = request.form.get("gender")
+    polyuria = request.form.get("polyuria")
+    polydipsia = request.form.get("polydipsia")
+    sudden_weight_loss = request.form.get("sudden_weight_loss")
+    polyphagia = request.form.get("polyphagia")
+    delayed_healing = request.form.get("delayed_healing")
+    obesity = request.form.get("obesity")
+    
+    new_data_dict = {
+        'age':                  [int(age)],
+        'gender':               [int(gender)],
+        'polyuria':             [int(polyuria)],
+        'polydipsia':           [int(polydipsia)],
+        'sudden_weight_loss':   [int(sudden_weight_loss)],
+        'polyphagia':           [int(polyphagia)],
+        'delayed_healing':      [int(delayed_healing)],
+        'obesity':              [int(obesity)]
+    }
+
+    # arr = [
+    #     67,	1,	1,	0,	0,	1,	1,	1
+    # ]
+    # new_data_dict = {'age':[arr[0]],'gender':[arr[1]],'polyuria':[arr[2]],'polydipsia':[arr[3]],'sudden_weight_loss':[arr[4]],'polyphagia':[arr[5]],'delayed_healing':[arr[6]],'obesity':[arr[7]]
+    # }
+
+    filename = env.fullPath + '\\diabetes\\DT.sav'
+    loaded_model = pickle.load(open(filename, 'rb'))
+
+    features = pd.DataFrame(new_data_dict, index=[0])
+    prediction = loaded_model.predict(features)
+    finalPredict = prediction[0].tolist()
+    probability = loaded_model.predict_proba(features)
+
+    confidenceN = probability[0][0]
+    confidenceP = probability[0][1]
+
+    print("==================================================")
+    print("confidence of 0: " + str(confidenceN))
+    print("confidence of 1: " + str(confidenceP))
+    print("prediction : " + str(finalPredict))
+
+    returnData = {
+        "PREDICTION" : finalPredict,
+        "CONFIDENT" : confidenceP if finalPredict > 0.5 else confidenceN,
+        "CONFIDENT_POSITIVE" : confidenceP,
+        "CONFIDENT_NEGATIVE" : confidenceN,
     }
 
     return composeReply("SUCCESS", "Prediksi", returnData)
