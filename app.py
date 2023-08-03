@@ -148,6 +148,65 @@ def diabetes2():
     return composeReply("SUCCESS", "Prediksi Diabetes", returnData)
 
 
+@app.route("/hipertensi", methods=['POST'])
+def hipertensi():
+    age = request.form.get("age")
+    bmi = request.form.get("bmi")
+    sex = request.form.get("sex")
+    physical_activity = request.form.get("physical_activity")
+    salt_content_in_the_diet = request.form.get("salt_content_in_the_diet")
+    level_of_stress = request.form.get("level_of_stress")
+    adrenal_and_thyroid_disorders = request.form.get("adrenal_and_thyroid_disorders")
+    
+    new_data_dict = {
+        'Age':                  [(age)],
+        'BMI':                 [(bmi)],
+        'Sex':             [(sex)],
+        'Physical_activity':      [(physical_activity)],
+        'salt_content_in_the_diet':           [(salt_content_in_the_diet)],
+        'Level_of_Stress':   [(level_of_stress)],
+        'Adrenal_and_thyroid_disorders':           [(adrenal_and_thyroid_disorders)],
+    }
+
+    if env.development == "local":
+        filePath = '\\hipertensi\\'
+    elif env.development == "doscom":
+        filePath = "/hipertensi/"
+
+    loaded_model = pickle.load(open(env.fullPath +  filePath + "hipertensi.sav", 'rb'))
+    df = pd.DataFrame(new_data_dict, index=[0])
+
+    with open(env.fullPath +  filePath + "scaler_bmi.pkl", 'rb') as file:
+        scaler_bmi = pickle.load(file)
+    df['BMI'] = scaler_bmi.transform(df[['BMI']])
+
+    with open(env.fullPath +  filePath + "scaler_age.pkl", 'rb') as file:
+        scaler_age = pickle.load(file)
+    df['Age'] = scaler_age.transform(df[['Age']])
+
+    prediction = loaded_model.predict(df)
+    finalPredict = prediction[0].tolist()
+    probability = loaded_model.predict_proba(df)
+
+    confidenceN = probability[0][0]
+    confidenceP = probability[0][1]
+
+    print("==================================================")
+    print("prediction : " + str(finalPredict))
+    print("probability : " + str(probability))
+    print("confidence of 0: " + str(confidenceN))
+    print("confidence of 1: " + str(confidenceP))
+
+    returnData = {
+        "PREDICTION" : finalPredict,
+        "CONFIDENT" : max([confidenceN, confidenceP]),
+        "CONFIDENT_POSITIVE" : confidenceP,
+        "CONFIDENT_NEGATIVE" : confidenceN,
+    }
+
+    return composeReply("SUCCESS", "Prediksi Hipertensi", returnData)
+
+
 @app.route("/kanker", methods=['POST'])
 def kanker():
     age = request.form.get("age")
@@ -320,6 +379,79 @@ def jantung():
 
     return composeReply("SUCCESS", "Prediksi Kanker Paru-Paru", returnData)
 
+
+@app.route("/stroke", methods=['POST'])
+def stroke():
+    gender = request.form.get("gender")
+    age = request.form.get("age")
+    hypertension = request.form.get("hypertension")
+    heart_disease = request.form.get("heart_disease")
+    work_type = request.form.get("work_type")
+    avg_glucose_level = request.form.get("avg_glucose_level")
+    bmi = request.form.get("bmi")
+    smoking_status = request.form.get("smoking_status")
+    
+    new_data_dict = {
+        'gender':                  [(gender)],
+        'age':                 [(age)],
+        'hypertension':             [(hypertension)],
+        'heart_disease':           [(heart_disease)],
+        'work_type':   [(work_type)],
+        'avg_glucose_level':           [(avg_glucose_level)],
+        'bmi':      [(bmi)],
+        'smoking_status':         [(smoking_status)]
+    }
+
+    if env.development == "local":
+        filePath = '\\stroke\\'
+    elif env.development == "doscom":
+        filePath = "/stroke/"
+
+    loaded_model = pickle.load(open(env.fullPath +  filePath + "stroke.sav", 'rb'))
+    df = pd.DataFrame(new_data_dict, index=[0])
+
+    df["bmi"] = df["bmi"].replace(',', '.', regex=True)
+    df["hypertension"] = df['hypertension'].replace(['Yes', 'No'], ["1", "0"])
+    df["heart_disease"] = df['heart_disease'].replace(['Yes', 'No'], ["1", "0"])
+    df["gender"] = df['gender'].replace(['Male', 'Female'], ["0", "1"])
+    
+    with open(env.fullPath +  filePath + 'le_work.pkl', 'rb') as f:
+        le_work = pickle.load(f)
+    df['work_type'] = le_work.transform(df['work_type'])
+
+    with open(env.fullPath +  filePath + 'le_smoking.pkl', 'rb') as f:
+        le_smoking = pickle.load(f)
+    df['smoking_status'] = le_smoking.transform(df['smoking_status'])
+    
+    with open(env.fullPath +  filePath + "scaler_bmi.pkl", 'rb') as file:
+        scaler_bmi = pickle.load(file)
+    df['bmi'] = scaler_bmi.transform(df[['bmi']])
+
+    with open(env.fullPath +  filePath + "scaler_age.pkl", 'rb') as file:
+        scaler_age = pickle.load(file)
+    df['age'] = scaler_age.transform(df[['age']])
+
+    prediction = loaded_model.predict(df)
+    finalPredict = prediction[0].tolist()
+    probability = loaded_model.predict_proba(df)
+
+    confidenceN = probability[0][0]
+    confidenceP = probability[0][1]
+
+    print("==================================================")
+    print("prediction : " + str(finalPredict))
+    print("probability : " + str(probability))
+    print("confidence of 0: " + str(confidenceN))
+    print("confidence of 1: " + str(confidenceP))
+
+    returnData = {
+        "PREDICTION" : finalPredict,
+        "CONFIDENT" : max([confidenceN, confidenceP]),
+        "CONFIDENT_POSITIVE" : confidenceP,
+        "CONFIDENT_NEGATIVE" : confidenceN,
+    }
+
+    return composeReply("SUCCESS", "Prediksi Stroke", returnData)
 
 
 if __name__ == '__main__':
