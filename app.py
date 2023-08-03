@@ -145,7 +145,181 @@ def diabetes2():
         "CONFIDENT_NEGATIVE" : confidenceN,
     }
 
-    return composeReply("SUCCESS", "Prediksi", returnData)
+    return composeReply("SUCCESS", "Prediksi Diabetes", returnData)
+
+
+@app.route("/kanker", methods=['POST'])
+def kanker():
+    age = request.form.get("age")
+    gender = request.form.get("gender")
+    air_pollution = request.form.get("air_pollution")
+    occupational_hazards = request.form.get("occupational_hazards")
+    genetic_risk = request.form.get("genetic_risk")
+    smoking = request.form.get("smoking")
+    passive_smoker = request.form.get("passive_smoker")
+    chest_pain = request.form.get("chest_pain")
+    coughing_of_blood = request.form.get("coughing_of_blood")
+    weight_loss = request.form.get("weight_loss")
+    shortness_of_breath = request.form.get("shortness_of_breath")
+    wheezing = request.form.get("wheezing")
+    dry_cough = request.form.get("dry_cough")
+    
+    new_data_dict = {
+        'Age': [int(age)],
+        'Gender': [int(gender)],
+        'Air Pollution': [int(air_pollution)],
+        'OccuPational Hazards': [int(occupational_hazards)],
+        'Genetic Risk': [int(genetic_risk)],
+        'Smoking': [int(smoking)],
+        'Passive Smoker': [int(passive_smoker)],
+        'Chest Pain': [int(chest_pain)],
+        'Coughing of Blood': [int(coughing_of_blood)],
+        'Weight Loss': [int(weight_loss)],
+        'Shortness of Breath': [int(shortness_of_breath)],
+        'Wheezing': [int(wheezing)],
+        'Dry Cough': [int(dry_cough)],
+    }
+
+    arr = [
+       35,	1,	4,	5,	5,	2,	3,	4,	8,	7,	9,	2,	7
+
+    ]
+    new_data_dict = {'Age':[arr[0]],'Gender':[arr[1]],'Air Pollution':[arr[2]],'OccuPational Hazards':[arr[3]],'Genetic Risk':[arr[4]],'Smoking':[arr[5]],'Passive Smoker':[arr[6]],'Chest Pain':[arr[7]],'Coughing of Blood':[arr[8]],'Weight Loss':[arr[9]],'Shortness of Breath':[arr[10]],'Wheezing':[arr[11]],'Dry Cough':[arr[12]]
+    }
+
+    if env.development == "local":
+        filePath = '\\kanker\\'
+    elif env.development == "doscom":
+        filePath = "/kanker/"
+
+    loaded_model = pickle.load(open(env.fullPath +  filePath + "kanker.sav", 'rb'))
+    features = pd.DataFrame(new_data_dict, index=[0])
+
+    with open(env.fullPath +  filePath + "scaler_age.pkl", 'rb') as file:
+        scaler = pickle.load(file)
+    features['Age'] = scaler.transform(features[['Age']])
+
+    prediction = loaded_model.predict(features)
+    finalPredict = prediction[0]
+    probability = loaded_model.predict_proba(features)
+
+    prob0 = probability[0][0]
+    prob1 = probability[0][1]
+    prob2 = probability[0][2]
+
+    print("==================================================")
+    print("prediction : " + str(finalPredict))
+    print("probability: " + str(probability))
+    print("probability 0: " + str(prob0))
+    print("probability 1: " + str(prob1))
+    print("probability 2: " + str(prob2))
+
+    returnData = {
+        "PREDICTION" : finalPredict,
+        "PROBABILITY" : max([prob0, prob1, prob2]),
+        "PROBABILITY_LOW" : prob0,
+        "PROBABILITY_MEDIUM" : prob1,
+        "PROBABILITY_HIGH" : prob2,
+    }
+
+    return composeReply("SUCCESS", "Prediksi Kanker", returnData)
+
+
+@app.route("/jantung", methods=['POST'])
+def jantung():
+    bmi = request.form.get("bmi")
+    smoking = request.form.get("smoking")
+    alcohol_drink = request.form.get("alcohol_drink")
+    stroke = request.form.get("stroke")
+    physical_health = request.form.get("physical_health")
+    mental_health = request.form.get("mental_health")
+    sex = request.form.get("sex")
+    age_category = request.form.get("age_category")
+    diabetic = request.form.get("diabetic")
+    physical_activity = request.form.get("physical_activity")
+    gen_health = request.form.get("gen_health")
+    sleep_time = request.form.get("sleep_time")
+    kidney_disease = request.form.get("kidney_disease")
+    
+    new_data_dict = {
+        'BMI':                  [(bmi)],
+        'Smoking':                 [(smoking)],
+        'AlcoholDrinking':             [(alcohol_drink)],
+        'Stroke':           [(stroke)],
+        'PhysicalHealth':   [(physical_health)],
+        'MentalHealth':           [(mental_health)],
+        'Sex':      [(sex)],
+        'AgeCategory':         [(age_category)],
+        'Diabetic':              [(diabetic)],
+        'PhysicalActivity':      [(physical_activity)],
+        'GenHealth':              [(gen_health)],
+        'SleepTime':              [(sleep_time)],
+        'KidneyDisease':        [(kidney_disease)],
+    }
+
+    if env.development == "local":
+        filePath = '\\jantung\\'
+    elif env.development == "doscom":
+        filePath = "/jantung/"
+
+    loaded_model = pickle.load(open(env.fullPath +  filePath + "jantung.sav", 'rb'))
+    df = pd.DataFrame(new_data_dict, index=[0])
+
+    df["BMI"] = df["BMI"].replace(',', '.', regex=True)
+    df["Smoking"] = df['Smoking'].replace(['Yes', 'No'], ["1", "0"])
+    df["AlcoholDrinking"] = df['AlcoholDrinking'].replace(['Yes', 'No'], ["1", "0"])
+    df["Stroke"] = df['Stroke'].replace(['Yes', 'No'], ["1", "0"])
+    df["Sex"] = df['Sex'].replace(['Male', 'Female'], ["1", "0"])
+
+    arrAgeCategory = list(map(str, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]))
+    #df["AgeCategory"] = df['AgeCategory'].replace(['18-24', '25-29', '30-34', '35-39', '40-44', '45-49', '50-54', '55-59', '60-64','65-69','70-74', '75-79', '80 or older'], arrAgeCategory)
+    #df["Diabetic"] = df['AlcoholDrinking'].replace(['Yes', 'Yes (during pregnancy)', 'No, borderline diabetes', 'No'], ["3", "2", "1", "0"])
+    #df["GenHealth"] = df['GenHealth'].replace(['Poor', 'Fair', 'Good','Very good', 'Excellent'], list(map(str, [0, 1, 2, 3, 4])))
+
+    df["PhysicalActivity"] = df['PhysicalActivity'].replace(['Yes', 'No'], ["1", "0"])
+    df["KidneyDisease"] = df['KidneyDisease'].replace(['Yes', 'No'], ["1", "0"])
+    #df["HeartDisease"] = df['HeartDisease'].replace(['Yes', 'No'], ["1", "0"])
+
+    import category_encoders as ce
+    # Buat objek ordinal encoder
+    ordinal_encoder = ce.OrdinalEncoder(cols=['AgeCategory'], mapping=[{'col': 'AgeCategory', 'mapping': {'18-24': 1, '25-29': 2, '30-34': 3, '35-39': 4, '40-44': 5, '45-49': 6, '50-54': 7, '55-59': 8, '60-64': 9, '65-69': 10, '70-74': 11, '75-79': 12, '80 or older': 13}}])
+    # Lakukan ordinal encoding pada kolom "AgeCategory"
+    df = ordinal_encoder.fit_transform(df)
+
+    ordinal_encoder = ce.OrdinalEncoder(cols=['GenHealth'], mapping=[{'col': 'GenHealth', 'mapping': {'Poor': 1, 'Fair': 2, 'Good': 3, 'Very good': 4, 'Excellent': 5}}])
+    # Lakukan ordinal encoding pada kolom "GenHealth"
+    df = ordinal_encoder.fit_transform(df)
+
+    ordinal_encoder = ce.OrdinalEncoder(cols=['Diabetic'], mapping=[{'col': 'Diabetic', 'mapping': {'No': 1, 'No, borderline diabetes': 2, 'Yes (during pregnancy)': 3, 'Yes': 4}}])
+    # Lakukan ordinal encoding pada kolom "Diabetic"
+    df = ordinal_encoder.fit_transform(df)
+
+    with open(env.fullPath +  filePath + "scaler_bmi.pkl", 'rb') as file:
+        scaler = pickle.load(file)
+    df['BMI'] = scaler.transform(df[['BMI']])
+
+    prediction = loaded_model.predict(df)
+    finalPredict = prediction[0]
+    probability = loaded_model.predict_proba(df)
+
+    confidenceN = probability[0][0]
+    confidenceP = probability[0][1]
+
+    print("==================================================")
+    print("prediction : " + str(finalPredict))
+    print("probability : " + str(probability))
+    print("confidence of 0: " + str(confidenceN))
+    print("confidence of 1: " + str(confidenceP))
+
+    returnData = {
+        "PREDICTION" : finalPredict,
+        "CONFIDENT" : max([confidenceN, confidenceP]),
+        "CONFIDENT_POSITIVE" : confidenceP,
+        "CONFIDENT_NEGATIVE" : confidenceN,
+    }
+
+    return composeReply("SUCCESS", "Prediksi Kanker Paru-Paru", returnData)
+
 
 
 if __name__ == '__main__':
