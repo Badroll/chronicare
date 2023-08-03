@@ -106,19 +106,25 @@ def diabetes2():
     }
 
     # arr = [
-    #     67,	1,	1,	0,	0,	1,	1,	1
+    #    58,	1,	0,	0,	0,	1,	1,	1
     # ]
     # new_data_dict = {'age':[arr[0]],'gender':[arr[1]],'polyuria':[arr[2]],'polydipsia':[arr[3]],'sudden_weight_loss':[arr[4]],'polyphagia':[arr[5]],'delayed_healing':[arr[6]],'obesity':[arr[7]]
     # }
 
     if env.development == "local":
-        filePath = '\\diabetes\\DT.sav'
+        filePath = '\\diabetes\\'
     elif env.development == "doscom":
-        filePath = "/diabetes/DT.sav"
-    filename = env.fullPath +  filePath
-    loaded_model = pickle.load(open(filename, 'rb'))
+        filePath = "/diabetes/"
 
+    loaded_model = pickle.load(open(env.fullPath +  filePath + "diabetes.sav", 'rb'))
     features = pd.DataFrame(new_data_dict, index=[0])
+
+    #features = pd.get_dummies(features, columns=['gender'])
+
+    with open(env.fullPath +  filePath + "scaler.pkl", 'rb') as file:
+        scaler = pickle.load(file)
+    features['age'] = scaler.transform(features[['age']])
+
     prediction = loaded_model.predict(features)
     finalPredict = prediction[0].tolist()
     probability = loaded_model.predict_proba(features)
@@ -130,6 +136,7 @@ def diabetes2():
     print("confidence of 0: " + str(confidenceN))
     print("confidence of 1: " + str(confidenceP))
     print("prediction : " + str(finalPredict))
+    print(features[['age']])
 
     returnData = {
         "PREDICTION" : finalPredict,
