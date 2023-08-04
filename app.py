@@ -239,12 +239,12 @@ def kanker():
         'Dry Cough': [int(dry_cough)],
     }
 
-    arr = [
-       35,	1,	4,	5,	5,	2,	3,	4,	8,	7,	9,	2,	7
+    # arr = [
+    #    35,	1,	4,	5,	5,	2,	3,	4,	8,	7,	9,	2,	7
 
-    ]
-    new_data_dict = {'Age':[arr[0]],'Gender':[arr[1]],'Air Pollution':[arr[2]],'OccuPational Hazards':[arr[3]],'Genetic Risk':[arr[4]],'Smoking':[arr[5]],'Passive Smoker':[arr[6]],'Chest Pain':[arr[7]],'Coughing of Blood':[arr[8]],'Weight Loss':[arr[9]],'Shortness of Breath':[arr[10]],'Wheezing':[arr[11]],'Dry Cough':[arr[12]]
-    }
+    # ]
+    # new_data_dict = {'Age':[arr[0]],'Gender':[arr[1]],'Air Pollution':[arr[2]],'OccuPational Hazards':[arr[3]],'Genetic Risk':[arr[4]],'Smoking':[arr[5]],'Passive Smoker':[arr[6]],'Chest Pain':[arr[7]],'Coughing of Blood':[arr[8]],'Weight Loss':[arr[9]],'Shortness of Breath':[arr[10]],'Wheezing':[arr[11]],'Dry Cough':[arr[12]]
+    # }
 
     if env.development == "local":
         filePath = '\\kanker\\'
@@ -288,7 +288,7 @@ def kanker():
 def jantung():
     bmi = request.form.get("bmi")
     smoking = request.form.get("smoking")
-    alcohol_drink = request.form.get("alcohol_drink")
+    alcohol_drinking = request.form.get("alcohol_drinking")
     stroke = request.form.get("stroke")
     physical_health = request.form.get("physical_health")
     mental_health = request.form.get("mental_health")
@@ -303,7 +303,7 @@ def jantung():
     new_data_dict = {
         'BMI':                  [(bmi)],
         'Smoking':                 [(smoking)],
-        'AlcoholDrinking':             [(alcohol_drink)],
+        'AlcoholDrinking':             [(alcohol_drinking)],
         'Stroke':           [(stroke)],
         'PhysicalHealth':   [(physical_health)],
         'MentalHealth':           [(mental_health)],
@@ -330,14 +330,8 @@ def jantung():
     df["Stroke"] = df['Stroke'].replace(['Yes', 'No'], ["1", "0"])
     df["Sex"] = df['Sex'].replace(['Male', 'Female'], ["1", "0"])
 
-    arrAgeCategory = list(map(str, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]))
-    #df["AgeCategory"] = df['AgeCategory'].replace(['18-24', '25-29', '30-34', '35-39', '40-44', '45-49', '50-54', '55-59', '60-64','65-69','70-74', '75-79', '80 or older'], arrAgeCategory)
-    #df["Diabetic"] = df['AlcoholDrinking'].replace(['Yes', 'Yes (during pregnancy)', 'No, borderline diabetes', 'No'], ["3", "2", "1", "0"])
-    #df["GenHealth"] = df['GenHealth'].replace(['Poor', 'Fair', 'Good','Very good', 'Excellent'], list(map(str, [0, 1, 2, 3, 4])))
-
     df["PhysicalActivity"] = df['PhysicalActivity'].replace(['Yes', 'No'], ["1", "0"])
     df["KidneyDisease"] = df['KidneyDisease'].replace(['Yes', 'No'], ["1", "0"])
-    #df["HeartDisease"] = df['HeartDisease'].replace(['Yes', 'No'], ["1", "0"])
 
     import category_encoders as ce
     # Buat objek ordinal encoder
