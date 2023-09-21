@@ -484,7 +484,7 @@ def siara_image2latin():
         "AUDIO" : "-"
     }
 
-    return composeReply("SUCCESS", "Prediksi", returnData)
+    return composeReply("SUCCESS", "Hasil konversi gambar ke teks latin", returnData)
 
 
 if __name__ == '__main__':
