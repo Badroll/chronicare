@@ -8,8 +8,11 @@ from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
 import pickle
-
+import hashlib
+from os import path
+from datetime import datetime
 import json
+import os
 
 import env
 
@@ -27,6 +30,19 @@ def composeReply(status, message, payload = None):
     reply["MESSAGE"] = message
     reply["PAYLOAD"] = payload
     return jsonify(reply)
+
+ALLOWED_EXTENSION = set(["png", "jpg", "jpeg"])
+def allowed_file(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSION
+
+def saveFile(file):
+    try:
+        #filename = str(datetime.now()).replace(":", "-") + (file.filename)
+        filename = hashlib.md5(str(datetime.now()).encode('utf-8')).hexdigest() + "." + str(file.filename.rsplit(".", 1)[1].lower())
+        basedir = path.abspath(path.dirname(__file__))
+        file.save(path.join(basedir, "uploads", filename))
+        return filename
+    except TypeError as error : return [False, "Save file failed [" + error]
 
 
 @app.route("/diabetes", methods=['POST'])
@@ -446,6 +462,29 @@ def stroke():
     }
 
     return composeReply("SUCCESS", "Prediksi Stroke", returnData)
+
+
+@app.route("/siara/image2text", methods=["POST"])
+
+def siara_image2latin():
+    if "image" not in request.files: return composeReply("ERROR", "Parameter incomplete (image)")
+    file = request.files["image"]
+    if file.filename == "": return composeReply("ERROR", "Gagal memuat file")
+    if not (file and allowed_file(file.filename)): 
+        return composeReply("ERROR", "Gagal memuat file")
+    filename = saveFile(file)
+
+    currentpath = "uploads//"
+    filepath = currentpath + filename
+    os.remove(filepath)
+
+    returnData = {
+        "FILENAME" : filename,
+        "TEXT" : "lorem ipsum dolor sit amet",
+        "AUDIO" : "-"
+    }
+
+    return composeReply("SUCCESS", "Prediksi", returnData)
 
 
 if __name__ == '__main__':
