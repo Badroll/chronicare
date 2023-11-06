@@ -129,7 +129,7 @@ def diabetes2():
 
     if env.development == "local":
         filePath = '\\diabetes\\'
-    elif env.development == "doscom":
+    elif env.development == "vps":
         filePath = "/diabetes/"
 
     loaded_model = pickle.load(open(env.fullPath +  filePath + "diabetes.sav", 'rb'))
@@ -186,7 +186,7 @@ def hipertensi():
 
     if env.development == "local":
         filePath = '\\hipertensi\\'
-    elif env.development == "doscom":
+    elif env.development == "vps":
         filePath = "/hipertensi/"
 
     loaded_model = pickle.load(open(env.fullPath +  filePath + "hipertensi.sav", 'rb'))
@@ -264,7 +264,7 @@ def kanker():
 
     if env.development == "local":
         filePath = '\\kanker\\'
-    elif env.development == "doscom":
+    elif env.development == "vps":
         filePath = "/kanker/"
 
     loaded_model = pickle.load(open(env.fullPath +  filePath + "kanker.sav", 'rb'))
@@ -334,7 +334,7 @@ def jantung():
 
     if env.development == "local":
         filePath = '\\jantung\\'
-    elif env.development == "doscom":
+    elif env.development == "vps":
         filePath = "/jantung/"
 
     loaded_model = pickle.load(open(env.fullPath +  filePath + "jantung.sav", 'rb'))
@@ -414,7 +414,7 @@ def stroke():
 
     if env.development == "local":
         filePath = '\\stroke\\'
-    elif env.development == "doscom":
+    elif env.development == "vps":
         filePath = "/stroke/"
 
     loaded_model = pickle.load(open(env.fullPath +  filePath + "stroke.sav", 'rb'))
@@ -462,29 +462,6 @@ def stroke():
     }
 
     return composeReply("SUCCESS", "Prediksi Stroke", returnData)
-
-
-@app.route("/siara/image2text", methods=["POST"])
-
-def siara_image2latin():
-    if "image" not in request.files: return composeReply("ERROR", "Parameter incomplete (image)")
-    file = request.files["image"]
-    if file.filename == "": return composeReply("ERROR", "Gagal memuat file")
-    if not (file and allowed_file(file.filename)): 
-        return composeReply("ERROR", "Gagal memuat file")
-    filename = saveFile(file)
-
-    currentpath = "uploads//"
-    filepath = currentpath + filename
-    os.remove(filepath)
-
-    returnData = {
-        "FILENAME" : filename,
-        "TEXT" : "lorem ipsum dolor sit amet",
-        "AUDIO" : "-"
-    }
-
-    return composeReply("SUCCESS", "Hasil konversi gambar ke teks latin", returnData)
 
 
 if __name__ == '__main__':
